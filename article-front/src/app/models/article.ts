@@ -1,5 +1,5 @@
 export class Article {
-  id: bigint;
+  id: number;
   name: string;
   text: string;
   date: string;
