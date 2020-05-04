@@ -1,66 +1,51 @@
-import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
+import {BrowserModule} from '@angular/platform-browser';
+import {Injectable, NgModule} from '@angular/core';
 
-import { AppComponent } from './app.component';
-import { NavigationComponent } from './navigation/navigation.component';
-import { ArticleComponent } from './article-package/article/article.component';
-import { NotFoundComponent } from './not-found/not-found.component';
-import {RouterModule, Routes} from '@angular/router';
-import { ArticlesComponent } from './article-package/articles/articles.component';
-import {HttpClient, HttpClientModule, HttpHandler} from '@angular/common/http';
-import { ArticleFormComponent } from './article-package/article-form/article-form.component';
+import {AppComponent} from './app.component';
+import {NavigationComponent} from './navigation/navigation.component';
+import {NotFoundComponent} from './not-found/not-found.component';
+import {
+  HTTP_INTERCEPTORS,
+  HttpClient,
+  HttpClientModule,
+  HttpHandler,
+  HttpInterceptor,
+  HttpRequest
+} from '@angular/common/http';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import { HomeComponent } from './home/home.component';
+import {HomeComponent} from './home/home.component';
+import {AppRoutingModule} from './app-routing.module';
+import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
+import {LoginService} from './login/login.service';
 
-const appRoutes: Routes = [
-  {
-    path: 'articles/view/:id',
-    component: ArticleComponent
-  },
-  {
-    path: 'articles/edit/:id',
-    component: ArticleFormComponent
-  },
-  {
-    path: 'articles/create',
-    component: ArticleFormComponent
-  },
-  {
-    path: 'articles/delete/:id',
-    component: ArticlesComponent
-  },
-  {
-    path: 'articles',
-    component: ArticlesComponent
-  },
-  {
-    path: 'home',
-    component: HomeComponent
-  },
-  {
-    path: '**',
-    component: NotFoundComponent
+@Injectable()
+export class XhrInterceptor implements HttpInterceptor {
+
+  intercept(req: HttpRequest<any>, next: HttpHandler) {
+    const xhr = req.clone({
+      headers: req.headers.set('X-Requested-With', 'XMLHttpRequest')
+    });
+    return next.handle(xhr);
   }
-];
+}
 
 @NgModule({
   declarations: [
     AppComponent,
     NavigationComponent,
-    ArticleComponent,
+    HomeComponent,
     NotFoundComponent,
-    ArticlesComponent,
-    ArticleFormComponent,
-    HomeComponent
   ],
   imports: [
     BrowserModule,
     HttpClientModule,
     ReactiveFormsModule,
     FormsModule,
-    RouterModule.forRoot(appRoutes)
+    AppRoutingModule,
+    NgbModule
   ],
-  providers: [HttpClient],
+  providers: [HttpClient, LoginService, {provide: HTTP_INTERCEPTORS, useClass: XhrInterceptor, multi: true}],
   bootstrap: [AppComponent]
 })
-export class AppModule { }
+export class AppModule {
+}
